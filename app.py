@@ -1,29 +1,51 @@
-import flask
+# app.py
+from flask import Flask, request, jsonify
+app = Flask(__name__)
 
-from flaskext.mysql import MySQL
+@app.route('/getmsg/', methods=['GET'])
+def respond():
+    # Retrieve the name from url parameter
+    name = request.args.get("name", None)
 
-#instaniation
-app = flask.Flask(__name__)
-app.secret_key= 'secret'
+    # For debugging
+    print(f"got name {name}")
 
-#config
-app.config['MYSQL_DATABASE_USER'] = 'b28478beacc7d1'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'f364e5eb'
-app.config['MYSQL_DATABASE_DB'] = 'heroku_ec53c05b7bfefa2'
-app.config['MYSQL_DATABASE_HOST'] = 'us-cdbr-iron-east-04.cleardb.net'
+    response = {}
 
-#init MySQL
-mysql = MySQL()
-mysql.init_app(app)
+    # Check if user sent a name at all
+    if not name:
+        response["ERROR"] = "no name found, please send a name."
+    # Check if the user entered a number not a name
+    elif str(name).isdigit():
+        response["ERROR"] = "name can't be numeric."
+    # Now the user entered a valid name
+    else:
+        response["MESSAGE"] = f"Welcome {name} to our awesome platform!!"
 
+    # Return the response in json format
+    return jsonify(response)
 
-@app.route('/', methods=['GET'])
-def home():
-    return "<h1>Distant Reading Archive</h1><p>This site is a prototype API for distant reading of science fiction novels.</p>"
+@app.route('/post/', methods=['POST'])
+def post_something():
+    param = request.form.get('name')
+    print(param)
+    # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
+    if param:
+        return jsonify({
+            "Message": f"Welcome {name} to our awesome platform!!",
+            # Add this option to distinct the POST request
+            "METHOD" : "POST"
+        })
+    else:
+        return jsonify({
+            "ERROR": "no name found, please send a name."
+        })
 
-@app.route('/greg/', methods=['GET'])
-def greeg_greg():
-    return "<h1>Hello</h1><p>Greg</p>"
+# A welcome message to test our server
+@app.route('/')
+def index():
+    return "<h1>Welcome to our server !!</h1>"
 
-
-app.run()
+if __name__ == '__main__':
+    # Threaded option to enable multiple instances for multiple user access support
+    app.run(threaded=True, port=5000)
