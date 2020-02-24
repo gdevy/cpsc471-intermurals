@@ -2,7 +2,7 @@
 API for managing intramurals basketball league. 
 
 
-Setting up enviroment:
+Setting up enviroment in Windows :(
 
 1. Install pip for windows command line. I think it comes with python3.
 
