@@ -12,7 +12,7 @@ Setting up enviroment:
   Run in Windows command prompt (probably in admin mode):
     >python3 -m venv env
   
-    This should've created a env\ directory with Include\ Lib\ Scripts\.
+    This should've created a env\ directory with Include\ Lib\ Scripts\ .
     Start the virtual enviroment, run:
     >env\Scripts\activate
     
@@ -24,7 +24,9 @@ Setting up enviroment:
     Under user variables add new:
     
       Variable name: APP_SETTINGS
+      
       Variable value: config.DevelopmentConfig
+      
     Since database credentials shouldn't be in a git repo, we will store them in enviroment variables. 
     
     Add following 4 variables and corresponding value:
@@ -44,4 +46,4 @@ Setting up enviroment:
     >pip install -r requirements.txt
 
 6. Check that it works locally:
-  >python3 app.py
+    >python3 app.py
