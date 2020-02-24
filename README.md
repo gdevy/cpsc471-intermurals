@@ -12,11 +12,11 @@ Setting up enviroment:
   Run in Windows command prompt (probably in admin mode):
     >python3 -m venv env
   
-  This should've created a env\ directory with Include\ Lib\ Scripts\.
-  Start the virtual enviroment, run:
+    This should've created a env\ directory with Include\ Lib\ Scripts\.
+    Start the virtual enviroment, run:
     >env\Scripts\activate
     
-  If everything is going according to plan (env) should be showing at the start of the new command.
+    If everything is going according to plan (env) should be showing at the start of the new command.
 
 4. Set enviroment variable.
   Navigate to edit system variables (use windows search).
