@@ -1,6 +1,7 @@
 # app.py
 import os
 from flask import Flask, request, jsonify
+from flaskext.mysql import MySQL
 app = Flask(__name__)
 
 app.config['MYSQL_HOST'] = os.environ['MYSQL_HOST']
