@@ -9,12 +9,10 @@ Setting up enviroment:
 2. Create project folder. Pull repository.
 
 3. Create a virtual enviroment for the project.
-
   Run in Windows command prompt (probably in admin mode):
     >python3 -m venv env
     
   This should've created a env\ directory with Include\ Lib\ Scripts\.
-  
   Start the virtual enviroment, run:
     >env\Scripts\activate
     
@@ -23,10 +21,12 @@ Setting up enviroment:
 4. Set enviroment variable.
   Navigate to edit system variables (use windows search).
   Under user variables add new:
+  
     Variable name: APP_SETTINGS
     Variable value: config.DevelopmentConfig
   Since database credentials shouldn't be in a git repo, we will store them in enviroment variables. 
   Add following 4 variables and corresponding value:
+  
     MYSQL_DB
     MYSQL_HOST
     MYSQL_PASSWORD
