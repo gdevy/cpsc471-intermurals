@@ -36,5 +36,9 @@ def test_db():
 def hello_name(name):
 	return "Hello {}!".format(name)
 
+@app.route('/today')
+def current_date():
+	return "Feb. 24, 2020"
+
 if __name__ == '__main__':
 	app.run()
