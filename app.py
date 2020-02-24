@@ -2,17 +2,14 @@
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
-app.config['MYSQL_DB'] = 'MyDB'
+app.config['MYSQL_HOST'] = os.environ['MYSQL_HOST']
+app.config['MYSQL_USER'] = os.environ['MYSQL_USER']
+app.config['MYSQL_PASSWORD'] = os.environ['MYSQL_PASSWORD']
+app.config['MYSQL_DB'] = os.environ['MYSQL_DB']
+
+app.config.from_object(os.environ['APP_SETTINGS'])
 
 mysql = MySQL(app)
-
-@app.route('/getmsg/', methods=['GET'])
-def check_db_connection():
-    
-    return "<h1>" + 
 
 
 # A welcome message to test our server
