@@ -9,11 +9,15 @@ Setting up enviroment:
 2. Create project folder. Pull repository.
 
 3. Create a virtual enviroment for the project.
+
   Run in Windows command prompt (probably in admin mode):
     >python3 -m venv env
+    
   This should've created a env\ directory with Include\ Lib\ Scripts\.
+  
   Start the virtual enviroment, run:
     >env\Scripts\activate
+    
   If everything is going according to plan (env) should be showing at the start of the new command.
 
 4. Set enviroment variable.
