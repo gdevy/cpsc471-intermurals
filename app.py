@@ -27,9 +27,9 @@ def hello():
 def test_db():
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.execute("SELECT version()")
-	data = cursor.fetchone()
-	return "db connection success"
+	cursor.execute("SELECT member_name FROM " + os.environ['MYSQL_DB'] + ".test_table;")
+	data = cursor.fetchall()
+	return ' '.join(map(str, [name[0] for name in data]))
 	
 	
 @app.route('/<name>')
