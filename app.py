@@ -27,7 +27,7 @@ def hello():
 def test_db():
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.execute("SELECT 1")
+	cursor.execute("SELECT version()")
 	data = cursor.fetchone()
 	return "db connection success"
 	
