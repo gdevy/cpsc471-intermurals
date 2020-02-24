@@ -19,20 +19,23 @@ Setting up enviroment:
     If everything is going according to plan (env) should be showing at the start of the new command.
 
 4. Set enviroment variable.
-  Navigate to edit system variables (use windows search).
-  Under user variables add new:
+
+    Navigate to edit system variables (use windows search).
+    Under user variables add new:
+      Variable name: APP_SETTINGS
+      Variable value: config.DevelopmentConfig
+    Since database credentials shouldn't be in a git repo, we will store them in enviroment variables. 
+    Add following 4 variables and corresponding value:
   
-    Variable name: APP_SETTINGS
-    Variable value: config.DevelopmentConfig
-  Since database credentials shouldn't be in a git repo, we will store them in enviroment variables. 
-  Add following 4 variables and corresponding value:
+      MYSQL_DB
+      
+      MYSQL_HOST
+      
+      MYSQL_PASSWORD
+      
+      MYSQL_USER
   
-    MYSQL_DB
-    MYSQL_HOST
-    MYSQL_PASSWORD
-    MYSQL_USER
-  
-  Make sure to restart your windows command prompt app, otherwise variables won't work.
+    Make sure to restart your windows command prompt app, otherwise variables won't work.
     
 5. Install needed tools.
   Run pip installer tool against requirements.txt:
