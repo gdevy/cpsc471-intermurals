@@ -1,0 +1,9 @@
+[{ 
+  team: <string>,
+  season: <string>,
+  league: <string>,
+  wins: <number>,
+  losses: <number>,
+  games_played: <number>, 
+  win_percentage: <number>
+}]
