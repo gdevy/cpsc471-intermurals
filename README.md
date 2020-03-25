@@ -18,6 +18,10 @@ Setting up enviroment in Windows :(
     
     If everything is going according to plan (env) should be showing at the start of the new command.
 
+
+LINUX: virtualenv venv //names the environemnt (venv)
+
+
 4. Set enviroment variable.
 
     Navigate to edit system variables (use windows search).
@@ -40,10 +44,17 @@ Setting up enviroment in Windows :(
     >MYSQL_USER
   
     Make sure to restart your windows command prompt app, otherwise variables won't work.
-    
+
+LINUX: start firtual environment ($source activate)
+	call the bash script ($source ./activate.sh)
+
 5. Install needed tools.
   Run pip installer tool against requirements.txt:
     >pip install -r requirements.txt
 
 6. Check that it works locally:
     >python3 app.py
+
+LINUX: close virtual environment ($deactivate)
+
+
