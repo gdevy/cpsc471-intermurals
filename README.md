@@ -45,7 +45,7 @@ LINUX: virtualenv venv //names the environemnt (venv)
   
     Make sure to restart your windows command prompt app, otherwise variables won't work.
 
-LINUX: start firtual environment ($source activate)
+LINUX: start firtual environment ($source venv/bin/activate)
 	call the bash script ($source ./activate.sh)
 
 5. Install needed tools.
