@@ -6,7 +6,7 @@ main = Blueprint('main', __name__)
 
 
 @main.route("/")
-@main.route("/home", method = ['GET'])
+@main.route("/home", methods = ['GET'])
 def home():
 	conn = mysql.connect()
 	cursor = conn.cursor()
@@ -18,3 +18,4 @@ def home():
 @main.route("/about/<name>")
 def hello_name(name):
 	return "Hello {}!".format(name)
+
