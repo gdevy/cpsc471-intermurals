@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, json, make_response, render_template
 import jwt
 from api.models import User, login_required, AccessLevel
-from api import app
+from api import app, bcrypt, mysql
 import datetime
 
 authentication = Blueprint('authentication', __name__)

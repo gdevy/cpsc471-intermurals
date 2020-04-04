@@ -16,11 +16,12 @@ def create_app(config_class=Config):
     
     from api.teams.routes import teams
     from api.authentication.routes import authentication
-    # from api.players.routes import players
+    from api.stats.routes import stats
     from api.main.routes import main
 
     app.register_blueprint(authentication, url_prefix = '/authentication')
     app.register_blueprint(teams, url_prefix = '/teams')
+    app.register_blueprint(stats, url_prefix = '/stats')
     # app.register_blueprint(players, url_prefix = '/players')
     app.register_blueprint(main)
 
