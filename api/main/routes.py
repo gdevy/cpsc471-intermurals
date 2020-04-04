@@ -4,6 +4,8 @@ import os
 
 main = Blueprint('main', __name__)
 
+#This file can be used for practice if you want. It's not needed
+
 
 @main.route("/")
 @main.route("/home", methods = ['GET'])
