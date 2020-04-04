@@ -10,9 +10,10 @@ main = Blueprint('main', __name__)
 def home():
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.execute("SELECT member_name FROM " + os.environ['MYSQL_DB'] + ".test_table;")
+	cursor.callproc('getAllPersons', [])
 	data = cursor.fetchall()
-	return ' '.join(map(str, [name[0] for name in data]))
+	print(data)
+	return ' '.join(map(str, [row[0] for row in data]))
 
 
 @main.route("/about/<name>")
