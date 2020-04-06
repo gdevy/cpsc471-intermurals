@@ -22,14 +22,14 @@ def record_game(current_user):
 
 #public route
 @stats.route('/league/?league&season', methods = ['GET'])
-def get_standings(league,season):
-    return jsonify({'message' : 'Not a valid league OR season'}), 400
+def get_standings(league_id,season_id):
+
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.callproc('getStandings', [league,season])
+    cursor.callproc('getStandings2', [league_id,season_id])
     data = cursor.fetchall()
     print(data)
-    
+    return jsonify({'message' : 'Not a valid league OR season'}), 400
     #return ' '.join(map(str, [row[0] for row in data]))
 	
 	
