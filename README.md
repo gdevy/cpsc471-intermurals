@@ -19,7 +19,7 @@ Setting up enviroment in Windows :(
     If everything is going according to plan (env) should be showing at the start of the new command.
 
 
-LINUX: virtualenv venv //names the environemnt (venv)
+LINUX: virtualenv venv //names the environment (venv)
 
 
 4. Set enviroment variable.
@@ -45,15 +45,17 @@ LINUX: virtualenv venv //names the environemnt (venv)
   
     Make sure to restart your windows command prompt app, otherwise variables won't work.
 
-LINUX: start firtual environment ($source venv/bin/activate)
+LINUX: start virtual environment ($source venv/bin/activate)
 	call the bash script ($source ./activate.sh)
+
+LINUX: Check environment variables ($printenv)
 
 5. Install needed tools.
   Run pip installer tool against requirements.txt:
     >pip install -r requirements.txt
 
 6. Check that it works locally:
-    >python3 app.py
+    >python3 run.py
 
 LINUX: close virtual environment ($deactivate)
 

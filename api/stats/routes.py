@@ -18,3 +18,8 @@ def record_game(current_user):
     
     #call stored procedure for storing the game result
     return jsonify({'message' : 'Needs the Stored Procedure implemented'}), 501
+
+
+#public route
+@stats.route('/league/?league&season', methods = ['GET'])
+def get
