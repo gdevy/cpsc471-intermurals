@@ -10,7 +10,8 @@ app = Flask(__name__)
 
 def create_app(config_class=Config):
     app.config.from_object(Config)
-    
+    app.config['JSON_SORT_KEYS'] = False # prevents jsonify from reordering json
+     
     mysql.init_app(app)
     bcrypt.init_app(app)
     
