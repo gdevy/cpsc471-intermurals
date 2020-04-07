@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from api.models import login_required, User, AccessLevel
-
+from api import mysql
 stats = Blueprint('stats', __name__)
 
 
@@ -25,21 +25,32 @@ def record_game(current_user):
 def get_standings():
     league = request.args.get('league')
     season = request.args.get('season')
-    #write control to make sure we have a league and a season passed into the query parameters.
-     
-    # print(league)
-    # print(season)
-    return jsonify({'message' : 'Not a valid league OR season'}), 400
+    
+    #control to make sure we have a league and a season as query parameters.
+    if not season and not league:
+        print('error SEASON and LEAGUE parmeters not provided')
+        return jsonify({'message' : 'season and league parmaeters not provided'}), 400
+    elif not season:
+        print('error SEASON parameter not provided')
+        return jsonify({'message' : 'season parmeter not provided'}), 400
+    elif not league:
+        print('error LEAGUE parameter not privided')
+        return jsonify({'message' : 'league parmeter not provided'}), 400
+    #control to make sure the values are integers? Or is this done by the DB?
+    
+   
     conn = mysql.connect()
     cursor = conn.cursor()
     #try
     #args = (league_id,season_id)
     #cursor.callproc('getStandings2, args)
     
-    cursor.callproc('getStandings2', [league_id,season_id])
+    cursor.callproc('getStandings2', [league,season])
     data = cursor.fetchall()
     print(data)
-  
-    #return ' '.join(map(str, [row[0] for row in data]))
+
+    # return jsonify(data)
+    return ' '.join(map(str, [ row[0] for row in data]))
+   
 	
 	
