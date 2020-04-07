@@ -18,6 +18,13 @@ class User:
         self.user_id = user_id
         self.password = None
 
+class Standing:
+    def __init__(self,team_name,games_played,wins,losses,win_percentage):
+        self.team_name = team_name
+        self.games_played = games_played
+        self.wins = wins
+        self.losses = losses
+        self.win_percentage = win_percentage
 
 def login_required(func):
 

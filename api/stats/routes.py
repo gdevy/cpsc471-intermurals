@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from api.models import login_required, User, AccessLevel
+from api.models import login_required, User, AccessLevel, Standing
 from api import mysql
+import json
 stats = Blueprint('stats', __name__)
 
 
@@ -49,8 +50,22 @@ def get_standings():
     data = cursor.fetchall()
     print(data)
 
-    # return jsonify(data)
-    return ' '.join(map(str, [ row[0] for row in data]))
-   
+    #These and variations did not work
+        # return jsonify(data)
+        # return ' '.join(map(str, [ row[0] for row in data]))
+        # return jsonify(parse_standings(data))
+        # return json.dumps(parse_standings(data).__dict__)
+    
+    displayData = parse_standings(data)
+    return json.dumps(displayData, default=lambda o: o.__dict__, indent=4)
+    
+    #this one printed them all in line
+        # return '\n'.join(map(str, [json.dumps(row.__dict__) for row in displayData]))
 	
-	
+def parse_standings(data):
+    result = []
+    for row in data:
+        print(row)
+        print(row[0])
+        result.append(Standing(row[0],row[1],row[2],row[3],row[4]))
+    return result 
