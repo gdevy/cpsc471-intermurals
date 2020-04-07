@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, request, jsonify
 from api import mysql
 import os
 
@@ -21,4 +21,4 @@ def home():
 @main.route("/about/<name>")
 def hello_name(name):
 	return "Hello {}!".format(name)
-
+	
