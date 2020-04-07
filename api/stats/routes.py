@@ -55,7 +55,7 @@ def get_standings():
         # return ' '.join(map(str, [ row[0] for row in data]))
         # return jsonify(parse_standings(data))
         # return json.dumps(parse_standings(data).__dict__)
-    
+    # return '\n'.join(map(str, [row for row in data]))
     displayData = parse_standings(data)
     return json.dumps(displayData, default=lambda o: o.__dict__, indent=4)
     
