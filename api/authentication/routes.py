@@ -11,24 +11,22 @@ authentication = Blueprint('authentication', __name__)
 def check_token(current_user):
     return jsonify({'message': f'Token is valid for use {current_user.user_id} with acccess {current_user.access.name}'}), 201
 
+
+
 @authentication.route('/login', methods = ['POST'])
 def login_user():
 
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return make_response('Login required', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
-    
+        return make_response('Login Information Incomplete', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
     
     conn = mysql.connect()
     cursor = conn.cursor()
     cursor.callproc('get_password', [auth.username])
     data = cursor.fetchall()
 
-    if len(data) != 1:
-        return make_response('Inalid Credentials', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
-
-    if data[0][0] != auth.password:
+    if (len(data) != 1) or (data[0][0] != auth.password):
         return make_response('Inalid Credentials', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
 
     user = User(data[0][1], AccessLevel.referee)  #change to User(data[0][1], data[0][2]) when user type flag is aded
