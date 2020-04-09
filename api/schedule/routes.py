@@ -18,3 +18,21 @@ def record_game(current_user):
     
     #call stored procedure for storing the game result
     return jsonify({'message' : 'Needs the Stored Procedure implemented'}), 501
+
+
+    @schedule.route('/referee/', methods = ['PUT'])
+    @login_required
+    def update_ref_schedule(current_user):
+        ref_id = request.args.get('refereeID', default = None, type = int)
+        game_id = request.args.get('gameID', default = None, type = int)
+
+        if (not ref_id or not game_id):
+            return jsonify({'message': 'The ref_id and game_id must be provided'}), 400
+
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.callproc('update_ref_schedule', args=(ref_id, game_id))
+        if (not cursor.fetchall):
+            return jsonify({'message': 'The provided ref_id and game_id does not exist'}), 400
+
+        return "hi"
