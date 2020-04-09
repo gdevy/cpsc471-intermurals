@@ -15,22 +15,24 @@ def check_token(current_user):
 def login_user():
 
     auth = request.authorization
+
     if not auth or not auth.username or not auth.password:
         return make_response('Login required', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
     
-    #make database query in the user table by the username and their stored password
-    #replace the line below with the query results
-    user = User(1234, AccessLevel.player)
-    if not user:
-        return make_response('Username not found', 401, {'WWW-Authenticate' : 'Basic realm="Username not found"'})
     
-    #compare stored password with hashed current password instead of True below
-    if not True: #bcrypt.check_password_hash(user.password, quere_data.get('password'))
-        #if passwords didnt match
-        return make_response('Invalid Password', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.callproc('get_password', [auth.username])
+    data = cursor.fetchall()
 
-        
-    #check database password with the stored one
+    if len(data) != 1:
+        return make_response('Inalid Credentials', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
+
+    if data[0][0] != auth.password:
+        return make_response('Inalid Credentials', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
+
+    user = User(data[0][1], AccessLevel.referee)  #change to User(data[0][1], data[0][2]) when user type flag is aded
+
     token = jwt.encode({'user_id' : user.user_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30), 'access' : user.access.value}, app.config['SECRET_KEY'])
     return jsonify({'token' : token.decode('UTF-8')}), 201
 

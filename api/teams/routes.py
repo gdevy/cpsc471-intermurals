@@ -15,7 +15,7 @@ def register_team(current_user):
 
 @teams.route('/', methods = ['PUT'])
 @login_required
-def update_team(current_user):
+def update_team(current_user: User):
     req = request.json
     print(req)
 
@@ -28,7 +28,7 @@ def update_team(current_user):
 
 @teams.route('/roster/', methods = ['PUT'])
 @login_required
-def update_team_roster(current_user):
+def update_team_roster(current_user: User):
     req = request.json
     print(req)
     
