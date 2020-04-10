@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from api.models import login_required, User, AccessLevel
 from api import mysql
+import pymysql
 
 schedule = Blueprint('schedule', __name__)
 
@@ -21,19 +22,29 @@ def record_game(current_user):
     return jsonify({'message' : 'Needs the Stored Procedure implemented'}), 501
 
 
-    @schedule.route('/referee/', methods = ['PUT'])
-    @login_required
-    def update_ref_schedule(current_user):
-        ref_id = request.args.get('refereeID', default = None, type = int)
-        game_id = request.args.get('gameID', default = None, type = int)
+@schedule.route('/referee/', methods = ['POST'])
+@login_required
+def post_ref_schedule(current_user):
+    # retrieve query string parameters from URL
+    ref_id = request.args.get('refereeID', default = None, type = int)
+    game_id = request.args.get('gameID', default = None, type = int)
 
-        if (not ref_id or not game_id):
-            return jsonify({'message': 'The ref_id and game_id must be provided'}), 400
+    # error check: ensure that both ref_id and game_id are not null
+    if (ref_id is None or game_id is None):
+        return jsonify({'message': 'The ref_id and game_id must be provided'}), 400
 
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        cursor.callproc('update_ref_schedule',[ref_id, game_id])
-        if (not cursor.fetchall):
-            return jsonify({'message': 'The provided ref_id and game_id does not exist'}), 400
+    # connects to the database
+    conn = mysql.connect()
+    cursor = conn.cursor()
 
-        return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
+    # calls for the update_ref_schedule procedure
+    try: 
+        cursor.callproc('post_ref_schedule',[ref_id, game_id])
+    except Exception as e:
+        print(e)
+        if ('1452' in str(e)): 
+            return  jsonify ({'message': 'game_id or referee_id does not exist'}), 400
+        if ('1062' in str(e)): 
+            return  jsonify ({'message': 'That ref_id si already scheduled to that game_id'}), 400
+        
+    return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
