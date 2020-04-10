@@ -48,7 +48,7 @@ def get_player_stat():
 	# connect to sql database and call get_player_stat stored procedure
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.callproc('get_player_stat', args=(season_id, player_id, league_id))
+	cursor.callproc('get_player_stat', [season_id, player_id, league_id])
 	data = cursor.fetchall()
 
 	# map procedure output to a list
@@ -86,7 +86,8 @@ def get_team_stat():
 	# connect to sql database and call get_player_stat stored procedure
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.callproc('get_team_stat', args=(season_id, team_id, league_id))
+
+	cursor.callproc('get_team_stat', [season_id, team_id, league_id])
 	data = cursor.fetchall()
 
 	# map procedure output to a list

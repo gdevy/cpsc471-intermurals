@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from api.models import login_required, User, AccessLevel
+from api import mysql
 
 schedule = Blueprint('schedule', __name__)
 
@@ -31,8 +32,8 @@ def record_game(current_user):
 
         conn = mysql.connect()
         cursor = conn.cursor()
-        cursor.callproc('update_ref_schedule', args=(ref_id, game_id))
+        cursor.callproc('update_ref_schedule',[ref_id, game_id])
         if (not cursor.fetchall):
             return jsonify({'message': 'The provided ref_id and game_id does not exist'}), 400
 
-        return "hi"
+        return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
