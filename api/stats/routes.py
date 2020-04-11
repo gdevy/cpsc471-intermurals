@@ -139,3 +139,8 @@ def get_team_stat():
 		"seasons" : seasons_list
 	}
 	return jsonify(seasons_dict)
+
+@stats.route('/player/', methods=['PUT'])
+@login_required
+def update_player_stat(current_user):
+    return jsonify({'message': 'Successfully updated the game stats'}), 201
