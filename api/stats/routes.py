@@ -145,16 +145,12 @@ def get_team_stat():
 @stats.route('/player/', methods=['PUT'])
 @login_required
 def update_player_stat(current_user):
-<<<<<<< HEAD
-    return jsonify({'message': 'Successfully updated the game stats'}), 201
-=======
     # retrieve query string parameters from URL
 	player_id = request.args.get('playerID', default = None, type = int)
 	game_id = request.args.get('gameID', default = None, type = int)
 	fouls = request.args.get('fouls',  default = None, type = int)
 	rebounds = request.args.get('rebounds',  default = None, type = int)
 	assists = request.args.get('assists',  default = None, type = int)
-	print(player_id, game_id, fouls, rebounds, assists)
 
 	# error check: ensure that both ref_id and game_id are not null
 	if (player_id is None or game_id is None):
@@ -178,4 +174,3 @@ def update_player_stat(current_user):
 			return  jsonify ({'message': 'playerID does not play in a game with gameID'}), 400
 		
 	return jsonify({'message': 'Successfully updated the game stats'}), 201
->>>>>>> update_player_stat endpoint
