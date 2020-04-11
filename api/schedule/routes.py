@@ -3,7 +3,6 @@ from api.models import login_required, User, AccessLevel
 from api import mysql
 import pymysql
 
-
 schedule = Blueprint('schedule', __name__)
 
 
