@@ -53,7 +53,7 @@ def update_team(current_user: User):
     cursor = conn.cursor()
 
     try: 
-        cursor.callproc('update_team', [req.get('team_id'), req.get('captain_id'), req.get('fee_payment').get('league_id'), req.get('fee_payment').get('season_id'), req.get('fee_payment').get('date_paid')])
+        cursor.callproc('update_team', [req.get('team_id'), req.get('captain_id'), req.get('fee_payment', {}).get('league_id'), req.get('fee_payment', {}).get('season_id'), req.get('fee_payment', {}).get('date_paid', None)])
         data = cursor.fetchall()
         print(f'Got: {data}')
     except pymysql.MySQLError as err:
@@ -69,8 +69,16 @@ def update_team(current_user: User):
     
     new_leagues = req.get('league')
     if new_leagues:
-        return jsonify({'message' : 'Needs the Stored Procedure implemented to update roster'}), 501 
-    
+        # return jsonify({'message' : 'Needs the Stored Procedure implemented to update roster'}), 501 
+        for new_league in new_leagues:
+            print(f'Adding: {new_league}')
+            try:
+                cursor.callproc('register_for_league', [req.get('team_id'), new_league.get('league_id')])
+            except pymysql.MySQLError as err: 
+                errno = err.args[0]
+
+                print(f'Error number: {errno}, Error: {err.args[1]}')
+                return  jsonify ({'message': 'Something went wrong'}), 500
     
     return jsonify({'message' : 'It was ok'}), 201    
 
