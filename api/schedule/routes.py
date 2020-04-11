@@ -40,11 +40,12 @@ def post_ref_schedule(current_user):
     # calls for the update_ref_schedule procedure
     try: 
         cursor.callproc('post_ref_schedule',[ref_id, game_id])
-    except Exception as e:
-        print(e)
-        if ('1452' in str(e)): 
+    except pymysql.MySQLError as err:
+        errno = err.args[0]
+        print(f'Error number: {errno}')
+        if errno == 1452: 
             return  jsonify ({'message': 'game_id or referee_id does not exist'}), 400
-        if ('1062' in str(e)): 
-            return  jsonify ({'message': 'That ref_id si already scheduled to that game_id'}), 400
+        if errno == 1062: 
+            return  jsonify ({'message': 'That ref_id is already scheduled to that game_id'}), 400
         
     return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
