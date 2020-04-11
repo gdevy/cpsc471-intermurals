@@ -33,6 +33,10 @@ def post_ref_schedule(current_user):
     if (ref_id is None or game_id is None):
         return jsonify({'message': 'The ref_id and game_id must be provided'}), 400
 
+    # error check: ensure that ref_id is indeed a referee
+    if current_user.access is not AccessLevel.referee:
+        return jsonify({'message' : 'Invalid access level, needs a referee'}), 401
+            
     # connects to the database
     conn = mysql.connect()
     cursor = conn.cursor()
@@ -44,8 +48,8 @@ def post_ref_schedule(current_user):
         errno = err.args[0]
         print(f'Error number: {errno}')
         if errno == 1452: 
-            return  jsonify ({'message': 'game_id or referee_id does not exist'}), 400
+            return  jsonify ({'message': 'gameID or refereeID does not exist'}), 400
         if errno == 1062: 
-            return  jsonify ({'message': 'That ref_id is already scheduled to that game_id'}), 400
+            return  jsonify ({'message': 'That refereeID is already scheduled to that gameID'}), 400
         
     return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
