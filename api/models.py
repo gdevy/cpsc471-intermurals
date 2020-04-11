@@ -18,7 +18,6 @@ class User:
         self.user_id = user_id
         self.password = None
 
-
 def login_required(func):
 
     @wraps(func)
