@@ -173,4 +173,5 @@ def update_player_stat(current_user):
 		if errno == 1644: 
 			return  jsonify ({'message': 'playerID does not play in a game with gameID'}), 400
 		
+		
 	return jsonify({'message': 'Successfully updated the game stats'}), 201
