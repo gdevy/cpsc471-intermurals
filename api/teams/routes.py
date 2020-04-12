@@ -28,7 +28,7 @@ def register_team(current_user: User):
     except pymysql.MySQLError as err:
         errno = err.args[0]
         
-        if errno == 1452: 
+        if errno == 1452:
             return  jsonify ({'message': 'Provided league_id or player_id does not exist'}), 400
         if errno == 1062: 
             return  jsonify ({'message': 'That team name is already taken'}), 400
@@ -54,8 +54,6 @@ def update_team(current_user: User):
 
     try: 
         cursor.callproc('update_team', [req.get('team_id'), req.get('captain_id'), req.get('fee_payment', {}).get('league_id'), req.get('fee_payment', {}).get('season_id'), req.get('fee_payment', {}).get('date_paid', None)])
-        data = cursor.fetchall()
-        print(f'Got: {data}')
     except pymysql.MySQLError as err:
         errno = err.args[0]
         
@@ -69,18 +67,23 @@ def update_team(current_user: User):
     
     new_leagues = req.get('league')
     if new_leagues:
-        # return jsonify({'message' : 'Needs the Stored Procedure implemented to update roster'}), 501 
+        failed_leagues = []
         for new_league in new_leagues:
             print(f'Adding: {new_league}')
             try:
-                cursor.callproc('register_for_league', [req.get('team_id'), new_league.get('league_id')])
+                cursor.callproc('register_for_league', [new_league.get('league_id'), req.get('team_id')])
             except pymysql.MySQLError as err: 
                 errno = err.args[0]
 
-                print(f'Error number: {errno}, Error: {err.args[1]}')
-                return  jsonify ({'message': 'Something went wrong'}), 500
-    
-    return jsonify({'message' : 'It was ok'}), 201    
+                if errno == 1062:
+                    failed_leagues.append(new_league.get('league_id'))
+                else:
+                    print(f'Error number: {errno}, Error: {err.args[1]}')
+                    return  jsonify ({'message': 'Something went wrong'}), 500
+            
+        if failed_leagues:
+            return  jsonify ({'message': f'That team is already registered in the following leagues: {failed_leagues}, otherwise OK.'}), 500
+    return jsonify({'message' : 'Everything was OK.'}), 201    
 
 @teams.route('/roster/', methods = ['PUT'])
 @login_required
