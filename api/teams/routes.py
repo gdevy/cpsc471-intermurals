@@ -91,18 +91,34 @@ def update_team_roster(current_user: User):
     req = request.json
     print(req)
     
-    #make db query to get team_id based on team captain_id
-    if False:   #if current use is not a captain deny access
-        return jsonify({'message' : 'You dont have valid access level, only team captains can do this'}), 401
-    
-    if req.get('team_name'):    #if team name was specified
-        print(f'Updating team name to {req["team_name"]}')    #call team name stored proc using captains team_id
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.callproc('get_team_captain', [req.get('team_id')])
+    data = cursor.fetchall()
 
-    if req.get('captain_id'): #if captain_id was specified
-        print(f'Updating captain_id to name to {req["captain_id"]}')    #update the captain of team associated with current_user
+    if len(data) != 1:
+        return jsonify({'message' : 'Invalid team ID'}), 400
+
+    print(data)
+    if data[0][0] != current_user.user_id:   #if current use is not a captain deny access
+        return jsonify({'message' : f'Only a captain can do this. Contact {data[0][1]} {data[0][2]} at {data[0][3]}'}), 401
+    
+    try:
+        cursor.callproc('update_team_by_captain', [req.get('team_id'), req.get('captain_id'), req.get('team_name')])
+    except pymysql.MySQLError as err: 
+        errno = err.args[0]
+        print(f'Error number {errno}, Error: {err.args[1]}')
+
 
     if req.get('roster'): #if a roster was provided
-        print(f'Putting following players into team: {req["roster"]}')  #call roster stored proc
-    
+        players_failed = []
+        for new_player in req.get('roster'):
+            try:
+                cursor.callproc('update_team_roster', [req.get('team_id'), new_player.get('player_id')])
+            except pymysql.MySQLError as err:
+                errno = err.args[0]
+                print(f'Error number {errno}, Error: {err.args[1]}')
+                players_failed.append(new_player)
+        
 
-    return jsonify({'message' : 'Needs the Stored Procedures implemented'}), 501  
+    return jsonify({'message' : 'Updates successful'}), 201  
