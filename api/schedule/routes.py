@@ -63,36 +63,6 @@ def record_game(current_user):
 @schedule.route('/referee/', methods = ['POST'])
 @login_required
 def post_ref_schedule(current_user):
-<<<<<<< HEAD
-    # retrieve query string parameters from URL
-    ref_id = request.args.get('refereeID', default = None, type = int)
-    game_id = request.args.get('gameID', default = None, type = int)
-
-    # error check: ensure that both ref_id and game_id are not null
-    if (ref_id is None or game_id is None):
-        return jsonify({'message': 'The ref_id and game_id must be provided'}), 400
-
-    # error check: ensure that ref_id is indeed a referee
-    if current_user.access is not AccessLevel.referee:
-        return jsonify({'message' : 'Invalid access level, needs a referee'}), 401
-            
-    # connects to the database
-    conn = mysql.connect()
-    cursor = conn.cursor()
-
-    # calls for the update_ref_schedule procedure
-    try: 
-        cursor.callproc('post_ref_schedule',[ref_id, game_id])
-    except pymysql.MySQLError as err:
-        errno = err.args[0]
-        print(f'Error number: {errno}')
-        if errno == 1452: 
-            return  jsonify ({'message': 'gameID or refereeID does not exist'}), 400
-        if errno == 1062: 
-            return  jsonify ({'message': 'That refereeID is already scheduled to that gameID'}), 400
-        
-    return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
-=======
 	# retrieve query string parameters from URL
 	ref_id = request.args.get('refereeID', default = None, type = int)
 	game_id = request.args.get('gameID', default = None, type = int)
@@ -101,20 +71,47 @@ def post_ref_schedule(current_user):
 	if (ref_id is None or game_id is None):
 		return jsonify({'message': 'The ref_id and game_id must be provided'}), 400
 
+	# error check: ensure that ref_id is indeed a referee
+	if current_user.access is not AccessLevel.referee:
+		return jsonify({'message' : 'Invalid access level, needs a referee'}), 401
+			
 	# connects to the database
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
 	# calls for the update_ref_schedule procedure
-	try:
+	try: 
 		cursor.callproc('post_ref_schedule',[ref_id, game_id])
 	except pymysql.MySQLError as err:
 		errno = err.args[0]
 		print(f'Error number: {errno}')
-		if errno == 1452:
-			return  jsonify ({'message': 'game_id or referee_id does not exist'}), 400
-		if errno == 1062:
-			return  jsonify ({'message': 'That ref_id is already scheduled to that game_id'}), 400
+		if errno == 1452: 
+			return  jsonify ({'message': 'gameID or refereeID does not exist'}), 400
+		if errno == 1062: 
+			return  jsonify ({'message': 'That refereeID is already scheduled to that gameID'}), 400
 		
 	return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
->>>>>>> post-schedule
+
+
+@schedule.route('/league/', methods=['GET'])
+def get_league_schedule():
+	# retrieve query string parameters from URL
+	league_id = request.args.get('leagueID', default = None, type = int)
+	season_id = request.args.get('seasonID', default = None, type = int)
+	
+
+	# error check: ensure that league_id is provided
+	if not league_id:
+		return jsonify({'message': 'The leagueID must be provided'}), 400
+	if not season_id:
+		return jsonify({'message': 'The seasonID must be provided'}), 400
+
+	# connect to sql database and call get_player_stat stored procedure
+	conn = mysql.connect()
+	cursor = conn.cursor()
+	cursor.callproc('get_league_schedule', [league_id, season_id])
+	data = cursor.fetchall()
+
+	print(data)
+	
+	return jsonify({'message' : 'Needs the Stored Procedure implemented'}), 501

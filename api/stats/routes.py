@@ -9,17 +9,17 @@ stats = Blueprint('stats', __name__)
 @stats.route('/game/', methods=['PUT'])
 @login_required
 def record_game(current_user):
-    req = request.json
-    print(req)
+	req = request.json
+	print(req)
 
-    if current_user.access is not AccessLevel.referee:
-        return jsonify({'message': 'Invalid access level, needs a referee'}), 401
+	if current_user.access is not AccessLevel.referee:
+		return jsonify({'message': 'Invalid access level, needs a referee'}), 401
 
-    if False:  # made a db query to see if ref for game_id matches the current ref
-        return jsonify({'message': 'The results can only be posted by a game referee'}), 401
+	if False:  # made a db query to see if ref for game_id matches the current ref
+		return jsonify({'message': 'The results can only be posted by a game referee'}), 401
 
-    # call stored procedure for storing the game result
-    return jsonify({'message': 'Needs the Stored Procedure implemented'}), 501
+	# call stored procedure for storing the game result
+	return jsonify({'message': 'Needs the Stored Procedure implemented'}), 501
 
 
 #public route
@@ -145,7 +145,7 @@ def get_team_stat():
 @stats.route('/player/', methods=['PUT'])
 @login_required
 def update_player_stat(current_user):
-    # retrieve query string parameters from URL
+	# retrieve query string parameters from URL
 	player_id = request.args.get('playerID', default = None, type = int)
 	game_id = request.args.get('gameID', default = None, type = int)
 	fouls = request.args.get('fouls',  default = None, type = int)
@@ -159,12 +159,12 @@ def update_player_stat(current_user):
 	# error check: ensure that player_id is indeed a player
 	if current_user.access is not AccessLevel.player:
 		return jsonify({'message' : 'Invalid access level, needs a player'}), 401
-            
+			
 	# connects to the database
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
-    # calls for the update_ref_schedule procedure
+	# calls for the update_ref_schedule procedure
 	try: 
 		cursor.callproc('update_player_stat',[player_id, game_id, fouls, rebounds, assists])
 	except pymysql.MySQLError as err:
