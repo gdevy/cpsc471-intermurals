@@ -29,23 +29,24 @@ def record_game(current_user):
 			return jsonify({'message' : 'Invlaid access level, requires admin token'}), 401
 		conn = mysql.connect()
 		cursor = conn.cursor()
-		
+
+
 		#validate body
-		if not req['games']['home']:
-			return jsonify({'message' : 'The home team Id must be provided'}), 400
-		if not req['games']['away']:
-			return jsonify({'message' : 'The away team Id must be provided'}), 400
-		if not req['games']['date']:
-			return jsonify({'message' : 'The date of the game must be provided'}), 400
-		if not req['games']['location']:
-			return jsonify({'message' : 'The location Id of the game must be provided'}), 400
-		if not req['games']['season']:
-			return jsonify({'message' : 'The season Id for the teams must be provided'}), 400
-		
+		for i in range(0,len(req['games'])):
+			if not req['games'][i]['home']:
+				return jsonify({'message' : 'The home team Id must be provided for game at index: ' + str(i)}), 400
+			if not req['games'][i]['away']:
+				return jsonify({'message' : 'The away team Id must be provided at index: ' + str(i)}), 400
+			if not req['games'][i]['date']:
+				return jsonify({'message' : 'The date of the game must be provided at index: ' + str(i)}), 400
+			if not req['games'][i]['location']:
+				return jsonify({'message' : 'The location Id of the game must be provided at index: ' + str(i)}), 400
+			if not req['games'][i]['season']:
+				return jsonify({'message' : 'The season Id for the teams must be provided at index: ' + str(i)}), 400
 		
 		#iterate through the games list
 		for i in range(0,len(req['games'])):
-			
+
 			#call stored procedure for each game
 			try:
 				cursor.callproc('post_game_schedule',[req['games'][i]['home'], req['games'][i]['away'], req['games'][i]['date'], req['games'][i]['location'], req['games'][i]['season']])
