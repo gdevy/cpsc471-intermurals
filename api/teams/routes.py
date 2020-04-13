@@ -82,7 +82,7 @@ def update_team(current_user: User):
                     return  jsonify ({'message': 'Something went wrong'}), 500
             
         if failed_leagues:
-            return  jsonify ({'message': f'That team is already registered in the following leagues: {failed_leagues}, otherwise OK.'}), 500
+            return  jsonify ({'message': f'That team is already registered in the following leagues: {failed_leagues}, otherwise OK.'}), 200
     return jsonify({'message' : 'Everything was OK.'}), 201    
 
 @teams.route('/roster/', methods = ['PUT'])
@@ -110,15 +110,25 @@ def update_team_roster(current_user: User):
         print(f'Error number {errno}, Error: {err.args[1]}')
 
 
-    if req.get('roster'): #if a roster was provided
+    if req.get('roster'): 
         players_failed = []
         for new_player in req.get('roster'):
             try:
                 cursor.callproc('update_team_roster', [req.get('team_id'), new_player.get('player_id')])
             except pymysql.MySQLError as err:
                 errno = err.args[0]
-                print(f'Error number {errno}, Error: {err.args[1]}')
-                players_failed.append(new_player)
-        
 
+                if errno == 1062:
+                    players_failed.append(new_player.get('player_id'))
+                
+                if errno == 1452:
+                    players_failed.append(new_player.get('player_id'))
+
+                
+                print(f'Error number {errno}, Error: {err.args[1]}')
+                return jsonify({'message' : 'Something went wrong...'}), 500
+        
+        if players_failed:
+            return  jsonify ({'message': f'That team is already registered in the following leagues: {players_failed}, otherwise OK.'}), 200
+    
     return jsonify({'message' : 'Updates successful'}), 201  
