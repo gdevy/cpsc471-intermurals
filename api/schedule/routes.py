@@ -65,7 +65,7 @@ def record_game(current_user):
 def post_ref_schedule(current_user):
 	# retrieve query string parameters from URL
 	ref_id = current_user.user_id
-	game_id = request.args.get('gameID', default = None, type = int)
+	game_id = request.args.get('game_id', default = None, type = int)
 
 	# error check: ensure that both ref_id and game_id are not null
 	if (ref_id is None or game_id is None):
@@ -86,9 +86,9 @@ def post_ref_schedule(current_user):
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1452: 
-			return  jsonify ({'message': 'gameID or refereeID does not exist'}), 400
+			return  jsonify ({'message': 'game_id or referee_id does not exist'}), 400
 		if errno == 1062: 
-			return  jsonify ({'message': 'That refereeID is already scheduled to that gameID'}), 400
+			return  jsonify ({'message': 'That refereeID is already scheduled to that game_id'}), 400
 		
 	return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201 #created
 

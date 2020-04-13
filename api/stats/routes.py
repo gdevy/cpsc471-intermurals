@@ -5,23 +5,6 @@ import pymysql
 
 stats = Blueprint('stats', __name__)
 
-
-@stats.route('/game/', methods=['PUT'])
-@login_required
-def record_game(current_user):
-	req = request.json
-	print(req)
-
-	if current_user.access is not AccessLevel.referee:
-		return jsonify({'message': 'Invalid access level, needs a referee'}), 401
-
-	if False:  # made a db query to see if ref for game_id matches the current ref
-		return jsonify({'message': 'The results can only be posted by a game referee'}), 401
-
-	# call stored procedure for storing the game result
-	return jsonify({'message': 'Needs the Stored Procedure implemented'}), 501
-
-
 #public route
 @stats.route('/league/', methods = ['GET'])
 def get_standings():
@@ -73,9 +56,9 @@ def get_standings():
 @stats.route('/player/', methods=['GET'])
 def get_player_stat():
 	# retrieve query string parameters from URL
-	season_id = request.args.get('seasonID', default = None, type = int)
-	player_id = request.args.get('playerID', default = None, type = int)
-	league_id = request.args.get('leagueID',  default = None, type = int)
+	season_id = request.args.get('season_id', default = None, type = int)
+	player_id = request.args.get('player_id', default = None, type = int)
+	league_id = request.args.get('league_id',  default = None, type = int)
 
 	# error check: ensure that player_id is provided
 	if player_id is None:
@@ -91,9 +74,9 @@ def get_player_stat():
 	seasons_list = []
 	for i in range(0, len(data)):
 		items = {
-			'seasonId': data[i][6],
-			'firstName': data[i][0],
-			'lastName': data[i][1],
+			'season_id': data[i][6],
+			'first_name': data[i][0],
+			'last_name': data[i][1],
 			'points': float(data[i][2]),
 			'fouls': float(data[i][3]),
 			'rebounds': float(data[i][4]),
@@ -111,9 +94,9 @@ def get_player_stat():
 @stats.route('/team/', methods=['GET'])
 def get_team_stat():
 	# retrieve query string parameters from URL
-	season_id = request.args.get('seasonID', default = None, type = int)
-	league_id = request.args.get('leagueID',  default = None, type = int)
-	team_id = request.args.get('teamID', default = None, type = int)
+	season_id = request.args.get('season_id', default = None, type = int)
+	league_id = request.args.get('league_id',  default = None, type = int)
+	team_id = request.args.get('team_id', default = None, type = int)
 
 	# error check: ensure that player_id is provided
 	if team_id is None:
@@ -131,10 +114,10 @@ def get_team_stat():
 		seasons_list = []
 		for i in range(0, len(data)):
 			items = {
-				'seasonId': data[i][0],
+				'season_id': data[i][0],
 				'wins': float(data[i][1]),
 				'losses': float(data[i][2]),
-				'winPercentage': float(data[i][3]),
+				'win_percentage': float(data[i][3]),
 			}
 			seasons_list.append(items)				
 		
@@ -148,7 +131,7 @@ def get_team_stat():
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
-			return  jsonify ({'message': 'You do not play in a game specified with gameID'}), 400
+			return  jsonify ({'message': 'You do not play in a game specified with game_id'}), 400
 
 	
 
@@ -158,7 +141,7 @@ def get_team_stat():
 def update_player_stat(current_user):
     # retrieve query string parameters from URL and player id from current_user
 	player_id = current_user.user_id
-	game_id = request.args.get('gameID', default = None, type = int)
+	game_id = request.args.get('game_id', default = None, type = int)
 	points = request.args.get('points', default = None, type = int)
 	fouls = request.args.get('fouls',  default = None, type = int)
 	rebounds = request.args.get('rebounds',  default = None, type = int)
@@ -166,7 +149,7 @@ def update_player_stat(current_user):
 
 	# error check: ensure that game_id is not null
 	if (game_id is None):
-		return jsonify({'message': 'The gameID must be provided'}), 400
+		return jsonify({'message': 'The game_id must be provided'}), 400
 
 	# error check: ensure that player_id is indeed a player
 	if current_user.access is not AccessLevel.player:
@@ -183,7 +166,7 @@ def update_player_stat(current_user):
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
-			return  jsonify ({'message': 'You do not play in a game specified with gameID'}), 400
+			return  jsonify ({'message': 'You do not play in a game specified with game_id'}), 400
 	
 	return jsonify({'message': 'Successfully updated the player stats'}), 201
 
@@ -193,13 +176,13 @@ def update_player_stat(current_user):
 def update_game_stat(current_user):
     # retrieve query string parameters from URL and ref id from current_user
 	ref_id = current_user.user_id
-	game_id = request.args.get('gameID', default = None, type = int)
-	home_score = request.args.get('homeScore', default = None, type = int)
-	away_score = request.args.get('awayScore',  default = None, type = int)
+	game_id = request.args.get('game_id', default = None, type = int)
+	home_score = request.args.get('home_score', default = None, type = int)
+	away_score = request.args.get('away_score',  default = None, type = int)
 
 	# error check: ensure that game_id is not null
 	if (game_id is None):
-		return jsonify({'message': 'The gameID must be provided'}), 400
+		return jsonify({'message': 'The game_id must be provided'}), 400
 
 	# error check: ensure person inputting is indeed a referee
 	if current_user.access is not AccessLevel.referee:
