@@ -25,8 +25,8 @@ def record_game(current_user):
 @schedule.route('/referee/', methods = ['POST'])
 @login_required
 def post_ref_schedule(current_user):
-    # retrieve query string parameters from URL
-    ref_id = request.args.get('refereeID', default = None, type = int)
+    # retrieve query string parameters from URL and user_id from current_user
+    ref_id = current_user.user_id
     game_id = request.args.get('gameID', default = None, type = int)
 
     # error check: ensure that both ref_id and game_id are not null
