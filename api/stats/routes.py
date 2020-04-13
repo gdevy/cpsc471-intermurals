@@ -159,13 +159,8 @@ def get_team_stat():
 @stats.route('/player/', methods=['PUT'])
 @login_required
 def update_player_stat(current_user):
-<<<<<<< HEAD
     # retrieve query string parameters from URL and player id from current_user
 	player_id = current_user.user_id
-=======
-	# retrieve query string parameters from URL
-	player_id = request.args.get('playerID', default = None, type = int)
->>>>>>> get-league-schedule
 	game_id = request.args.get('gameID', default = None, type = int)
 	points = request.args.get('points', default = None, type = int)
 	fouls = request.args.get('fouls',  default = None, type = int)
@@ -184,18 +179,13 @@ def update_player_stat(current_user):
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
-<<<<<<< HEAD
-    # calls for the update_player_stat procedure
-=======
 	# calls for the update_ref_schedule procedure
->>>>>>> get-league-schedule
 	try: 
 		cursor.callproc('update_player_stat',[player_id, game_id, points,fouls, rebounds, assists])
 	except pymysql.MySQLError as err:
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
-<<<<<<< HEAD
 			return  jsonify ({'message': 'You do not play in a game specified with gameID'}), 400
 	
 	return jsonify({'message': 'Successfully updated the player stats'}), 201
@@ -232,9 +222,3 @@ def update_game_stat(current_user):
 			return  jsonify ({'message': 'You are not scheduled to the game specified with gameID'}), 400
     
 	return jsonify({'message': 'Successfully updated the game stats'}), 201
-=======
-			return  jsonify ({'message': 'playerID does not play in a game with gameID'}), 400
-		
-	return jsonify({'message': 'Successfully updated the game stats'}), 201
-
->>>>>>> get-league-schedule
