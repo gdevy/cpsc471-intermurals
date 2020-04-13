@@ -131,7 +131,7 @@ def get_team_stat():
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
-			return  jsonify ({'message': 'You do not play in a game specified with game_id'}), 400
+			return  jsonify ({'message': 'Team does not play specified with league and season'}), 400
 
 	
 
