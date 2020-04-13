@@ -31,7 +31,7 @@ def record_game(current_user):
 		cursor = conn.cursor()
 
 
-		#validate body
+		#validate body, check all the games to make sure all the fields have been filled out
 		for i in range(0,len(req['games'])):
 			if not req['games'][i]['home']:
 				return jsonify({'message' : 'The home team Id must be provided for game at index: ' + str(i)}), 400
@@ -90,7 +90,7 @@ def post_ref_schedule(current_user):
 		if errno == 1062: 
 			return  jsonify ({'message': 'That refereeID is already scheduled to that gameID'}), 400
 		
-	return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
+	return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201 #created
 
 
 @schedule.route('/league/', methods=['GET'])
@@ -101,17 +101,55 @@ def get_league_schedule():
 	
 
 	# error check: ensure that league_id is provided
-	if not league_id:
+	if league_id is None and season_id is None:
+		return jsonify({'message': 'The leagueID and seasonID must be provided'}), 400 #bad request
+	if league_id is None:
 		return jsonify({'message': 'The leagueID must be provided'}), 400
-	if not season_id:
+	if season_id is None:
 		return jsonify({'message': 'The seasonID must be provided'}), 400
 
 	# connect to sql database and call get_player_stat stored procedure
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.callproc('get_league_schedule', [league_id, season_id])
+	
+	#make sure the request is valid
+	try:
+		cursor.callproc('get_league_schedule', [league_id, season_id])
+	except pymysql.MySQLError as err:
+		errno = err.args[0]
+		print(f'Error number: {errno}')
+		if errno == 1644:
+			return  jsonify ({'message': err.args[1]}), 400
+	
 	data = cursor.fetchall()
 
-	print(data)
+	#make sure data is not empty
+	if not data:
+		return jsonify({'message' : 'No games scheduled for that league and season'}), 404 #url not found
 	
-	return jsonify({'message' : 'Needs the Stored Procedure implemented'}), 501
+	games_list = []
+
+	#iterate through data and populate games_list
+	for i in range(0, len(data)):
+		items = {
+			'date':data[i][1],
+			'away_team': {
+				'team_id': data[i][2],
+				'score': data[i][3]
+			},
+			'home_team': {
+				'team_id': data[i][4],
+				'score': data[i][5]
+			},
+			'game_id': data[i][6],
+			'location': data[i][7]
+		}
+		games_list.append(items)
+	
+	#create dictionary to be jsonified
+	schedule_dict = {
+		"league_name": data[0][0],
+		"games": games_list
+	}
+	
+	return jsonify(schedule_dict), 200

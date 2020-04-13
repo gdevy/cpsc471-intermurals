@@ -30,13 +30,13 @@ def get_standings():
 	season = request.args.get('season', default = None, type = int)
 
 	#control to make sure both the season and league are passed as query parameters
-	if not season and not league:
+	if season is None and league is None:
 		print('error SEASON and LEAGUE parmeters not provided')
 		return jsonify({'message' : 'season and league parmaeters not provided'}), 400
-	elif not season:
+	elif season is None:
 		print('error SEASON parameter not provided')
 		return jsonify({'message' : 'season parmeter not provided'}), 400
-	elif not league:
+	elif league is None:
 		print('error LEAGUE parameter not privided')
 		return jsonify({'message' : 'league parmeter not provided'}), 400
 	
@@ -67,7 +67,7 @@ def get_standings():
 		"league": league,		
 		"standings" : standings_list
 	}
-	return jsonify(standings_dict)
+	return jsonify(standings_dict), 200
 	
 	
 @stats.route('/player/', methods=['GET'])
@@ -174,3 +174,4 @@ def update_player_stat(current_user):
 			return  jsonify ({'message': 'playerID does not play in a game with gameID'}), 400
 		
 	return jsonify({'message': 'Successfully updated the game stats'}), 201
+
