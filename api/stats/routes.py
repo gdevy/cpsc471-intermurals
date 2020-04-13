@@ -103,7 +103,6 @@ def get_team_stat():
 	if team_id is None:
 		return jsonify({'message': 'The team_id must be provided'}), 400
 
-	# connect to sql database and call get_player_stat stored procedure
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
