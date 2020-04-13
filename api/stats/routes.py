@@ -62,7 +62,7 @@ def get_player_stat():
 	league_id = request.args.get('leagueID',  default = None, type = int)
 
 	# error check: ensure that player_id is provided
-	if not player_id:
+	if player_id is None:
 		return jsonify({'message': 'The player_id must be provided'}), 400
 
 	# connect to sql database and call get_player_stat stored procedure
@@ -96,34 +96,45 @@ def get_player_stat():
 def get_team_stat():
 	# retrieve query string parameters from URL
 	season_id = request.args.get('seasonID', default = None, type = int)
-	team_id = request.args.get('teamID', default = None, type = int)
 	league_id = request.args.get('leagueID',  default = None, type = int)
+	team_id = request.args.get('teamID', default = None, type = int)
 
 	# error check: ensure that player_id is provided
 	if team_id is None:
 		return jsonify({'message': 'The team_id must be provided'}), 400
 
+	# connect to the database
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
-	cursor.callproc('get_team_stat', [season_id, team_id, league_id])
-	data = cursor.fetchall()
+	try:
+		cursor.callproc('get_team_stat', [season_id, league_id, team_id])
+		data = cursor.fetchall()
 
-	# map procedure output to a list
-	seasons_list = []
-	for i in range(0, len(data)):
-		items = {
-			'seasonId': data[i][0],
-			'wins': float(data[i][1]),
-			'losses': float(data[i][2]),
-			'winPercentage': float(data[i][3]),
+		# map procedure output to a list
+		seasons_list = []
+		for i in range(0, len(data)):
+			items = {
+				'seasonId': data[i][0],
+				'wins': float(data[i][1]),
+				'losses': float(data[i][2]),
+				'winPercentage': float(data[i][3]),
+			}
+			seasons_list.append(items)				
+		
+		seasons_dict = {
+			"seasons" : seasons_list
 		}
-		seasons_list.append(items)
 
-	seasons_dict = {
-		"seasons" : seasons_list
-	}
-	return jsonify(seasons_dict)
+		return jsonify(seasons_dict)
+
+	except pymysql.MySQLError as err:
+		errno = err.args[0]
+		print(f'Error number: {errno}')
+		if errno == 1644: 
+			return  jsonify ({'message': 'You do not play in a game specified with gameID'}), 400
+
+	
 
 
 @stats.route('/player/', methods=['PUT'])
@@ -156,7 +167,7 @@ def update_player_stat(current_user):
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
-			return  jsonify ({'message': 'You doe not play in a game specified with gameID'}), 400
+			return  jsonify ({'message': 'You do not play in a game specified with gameID'}), 400
 	
 	return jsonify({'message': 'Successfully updated the player stats'}), 201
 
