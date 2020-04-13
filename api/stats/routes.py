@@ -6,22 +6,6 @@ import pymysql
 stats = Blueprint('stats', __name__)
 
 
-@stats.route('/game/', methods=['PUT'])
-@login_required
-def record_game(current_user):
-    req = request.json
-    print(req)
-
-    if current_user.access is not AccessLevel.referee:
-        return jsonify({'message': 'Invalid access level, needs a referee'}), 401
-
-    if False:  # made a db query to see if ref for game_id matches the current ref
-        return jsonify({'message': 'The results can only be posted by a game referee'}), 401
-
-    # call stored procedure for storing the game result
-    return jsonify({'message': 'Needs the Stored Procedure implemented'}), 501
-
-
 #public route
 @stats.route('/league/', methods = ['GET'])
 def get_standings():
@@ -142,19 +126,21 @@ def get_team_stat():
 	}
 	return jsonify(seasons_dict)
 
+
 @stats.route('/player/', methods=['PUT'])
 @login_required
 def update_player_stat(current_user):
-    # retrieve query string parameters from URL
-	player_id = request.args.get('playerID', default = None, type = int)
+    # retrieve query string parameters from URL and player id from current_user
+	player_id = current_user.user_id
 	game_id = request.args.get('gameID', default = None, type = int)
+	points = request.args.get('points', default = None, type = int)
 	fouls = request.args.get('fouls',  default = None, type = int)
 	rebounds = request.args.get('rebounds',  default = None, type = int)
 	assists = request.args.get('assists',  default = None, type = int)
 
-	# error check: ensure that both ref_id and game_id are not null
-	if (player_id is None or game_id is None):
-		return jsonify({'message': 'The playerID and gameID must be provided'}), 400
+	# error check: ensure that game_id is not null
+	if (game_id is None):
+		return jsonify({'message': 'The gameID must be provided'}), 400
 
 	# error check: ensure that player_id is indeed a player
 	if current_user.access is not AccessLevel.player:
@@ -164,14 +150,46 @@ def update_player_stat(current_user):
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
-    # calls for the update_ref_schedule procedure
+    # calls for the update_player_stat procedure
 	try: 
-		cursor.callproc('update_player_stat',[player_id, game_id, fouls, rebounds, assists])
+		cursor.callproc('update_player_stat',[player_id, game_id, points,fouls, rebounds, assists])
 	except pymysql.MySQLError as err:
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
-			return  jsonify ({'message': 'playerID does not play in a game with gameID'}), 400
-		
-		
+			return  jsonify ({'message': 'You doe not play in a game specified with gameID'}), 400
+	
+	return jsonify({'message': 'Successfully updated the player stats'}), 201
+
+
+@stats.route('/game/', methods=['PUT'])
+@login_required
+def update_game_stat(current_user):
+    # retrieve query string parameters from URL and ref id from current_user
+	ref_id = current_user.user_id
+	game_id = request.args.get('gameID', default = None, type = int)
+	home_score = request.args.get('homeScore', default = None, type = int)
+	away_score = request.args.get('awayScore',  default = None, type = int)
+
+	# error check: ensure that game_id is not null
+	if (game_id is None):
+		return jsonify({'message': 'The gameID must be provided'}), 400
+
+	# error check: ensure person inputting is indeed a referee
+	if current_user.access is not AccessLevel.referee:
+		return jsonify({'message': 'Invalid access level, needs a referee'}), 401
+ 
+	# connects to the database
+	conn = mysql.connect()
+	cursor = conn.cursor()
+
+    # calls for the update_game_stat procedure
+	try: 
+		cursor.callproc('update_game_stat',[ref_id, game_id, home_score, away_score])
+	except pymysql.MySQLError as err:
+		errno = err.args[0]
+		print(f'Error number: {errno}')
+		if errno == 1644:
+			return  jsonify ({'message': 'You are not scheduled to the game specified with gameID'}), 400
+    
 	return jsonify({'message': 'Successfully updated the game stats'}), 201
