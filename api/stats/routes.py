@@ -10,8 +10,8 @@ stats = Blueprint('stats', __name__)
 @stats.route('/league/', methods = ['GET'])
 def get_standings():
 	#get values from the query parameters
-	league = request.args.get('league')
-	season = request.args.get('season')
+	league = request.args.get('league', default = None, type = int)
+	season = request.args.get('season', default = None, type = int)
 
 	#control to make sure both the season and league are passed as query parameters
 	if not season and not league:
@@ -27,7 +27,7 @@ def get_standings():
 	#control to make sure the values are integers? Or is this done by the DB?
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.callproc('getStandings2', [league,season])
+	cursor.callproc('get_standings', [league,season])
 	data = cursor.fetchall()
 	
 	#print data to terminal to confirm values
