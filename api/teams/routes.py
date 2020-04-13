@@ -28,7 +28,7 @@ def register_team(current_user: User):
     except pymysql.MySQLError as err:
         errno = err.args[0]
         
-        if errno == 1452: 
+        if errno == 1452:
             return  jsonify ({'message': 'Provided league_id or player_id does not exist'}), 400
         if errno == 1062: 
             return  jsonify ({'message': 'That team name is already taken'}), 400
@@ -54,8 +54,6 @@ def update_team(current_user: User):
 
     try: 
         cursor.callproc('update_team', [req.get('team_id'), req.get('captain_id'), req.get('fee_payment', {}).get('league_id'), req.get('fee_payment', {}).get('season_id'), req.get('fee_payment', {}).get('date_paid', None)])
-        data = cursor.fetchall()
-        print(f'Got: {data}')
     except pymysql.MySQLError as err:
         errno = err.args[0]
         
@@ -69,18 +67,23 @@ def update_team(current_user: User):
     
     new_leagues = req.get('league')
     if new_leagues:
-        # return jsonify({'message' : 'Needs the Stored Procedure implemented to update roster'}), 501 
+        failed_leagues = []
         for new_league in new_leagues:
             print(f'Adding: {new_league}')
             try:
-                cursor.callproc('register_for_league', [req.get('team_id'), new_league.get('league_id')])
+                cursor.callproc('register_for_league', [new_league.get('league_id'), req.get('team_id')])
             except pymysql.MySQLError as err: 
                 errno = err.args[0]
 
-                print(f'Error number: {errno}, Error: {err.args[1]}')
-                return  jsonify ({'message': 'Something went wrong'}), 500
-    
-    return jsonify({'message' : 'It was ok'}), 201    
+                if errno == 1062:
+                    failed_leagues.append(new_league.get('league_id'))
+                else:
+                    print(f'Error number: {errno}, Error: {err.args[1]}')
+                    return  jsonify ({'message': 'Something went wrong'}), 500
+            
+        if failed_leagues:
+            return  jsonify ({'message': f'That team is already registered in the following leagues: {failed_leagues}, otherwise OK.'}), 200
+    return jsonify({'message' : 'Everything was OK.'}), 201    
 
 @teams.route('/roster/', methods = ['PUT'])
 @login_required
@@ -88,18 +91,44 @@ def update_team_roster(current_user: User):
     req = request.json
     print(req)
     
-    #make db query to get team_id based on team captain_id
-    if False:   #if current use is not a captain deny access
-        return jsonify({'message' : 'You dont have valid access level, only team captains can do this'}), 401
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.callproc('get_team_captain', [req.get('team_id')])
+    data = cursor.fetchall()
+
+    if len(data) != 1:
+        return jsonify({'message' : 'Invalid team ID'}), 400
+
+    print(data)
+    if data[0][0] != current_user.user_id:   #if current use is not a captain deny access
+        return jsonify({'message' : f'Only a captain can do this. Contact {data[0][1]} {data[0][2]} at {data[0][3]}'}), 401
     
-    if req.get('team_name'):    #if team name was specified
-        print(f'Updating team name to {req["team_name"]}')    #call team name stored proc using captains team_id
+    try:
+        cursor.callproc('update_team_by_captain', [req.get('team_id'), req.get('captain_id'), req.get('team_name')])
+    except pymysql.MySQLError as err: 
+        errno = err.args[0]
+        print(f'Error number {errno}, Error: {err.args[1]}')
 
-    if req.get('captain_id'): #if captain_id was specified
-        print(f'Updating captain_id to name to {req["captain_id"]}')    #update the captain of team associated with current_user
 
-    if req.get('roster'): #if a roster was provided
-        print(f'Putting following players into team: {req["roster"]}')  #call roster stored proc
+    if req.get('roster'): 
+        players_failed = []
+        for new_player in req.get('roster'):
+            try:
+                cursor.callproc('update_team_roster', [req.get('team_id'), new_player.get('player_id')])
+            except pymysql.MySQLError as err:
+                errno = err.args[0]
+
+                if errno == 1062:
+                    players_failed.append(new_player.get('player_id'))
+                
+                if errno == 1452:
+                    players_failed.append(new_player.get('player_id'))
+
+                
+                print(f'Error number {errno}, Error: {err.args[1]}')
+                return jsonify({'message' : 'Something went wrong...'}), 500
+        
+        if players_failed:
+            return  jsonify ({'message': f'That team is already registered in the following leagues: {players_failed}, otherwise OK.'}), 200
     
-
-    return jsonify({'message' : 'Needs the Stored Procedures implemented'}), 501  
+    return jsonify({'message' : 'Updates successful'}), 201  
