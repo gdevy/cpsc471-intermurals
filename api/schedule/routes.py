@@ -94,28 +94,3 @@ def post_ref_schedule(current_user):
             return  jsonify ({'message': 'That refereeID is already scheduled to that gameID'}), 400
         
     return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
-
-	# retrieve query string parameters from URL
-    ref_id = request.args.get('refereeID', default = None, type = int)
-    game_id = request.args.get('gameID', default = None, type = int)
-
-	# error check: ensure that both ref_id and game_id are not null
-    if (ref_id is None or game_id is None):
-        return jsonify({'message': 'The ref_id and game_id must be provided'}), 400
-
-	# connects to the database
-    conn = mysql.connect()
-    cursor = conn.cursor()
-
-	# calls for the update_ref_schedule procedure
-    try:
-        cursor.callproc('post_ref_schedule',[ref_id, game_id])
-    except pymysql.MySQLError as err:
-        errno = err.args[0]
-        print(f'Error number: {errno}')
-        if errno == 1452:
-            return  jsonify ({'message': 'game_id or referee_id does not exist'}), 400
-        if errno == 1062:
-            return  jsonify ({'message': 'That ref_id is already scheduled to that game_id'}), 400
-		
-    return jsonify({'message': 'Successfully scheduled a referee to a game'}), 201
