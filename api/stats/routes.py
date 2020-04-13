@@ -6,6 +6,25 @@ import pymysql
 stats = Blueprint('stats', __name__)
 
 
+<<<<<<< HEAD
+=======
+@stats.route('/game/', methods=['PUT'])
+@login_required
+def record_game(current_user):
+	req = request.json
+	print(req)
+
+	if current_user.access is not AccessLevel.referee:
+		return jsonify({'message': 'Invalid access level, needs a referee'}), 401
+
+	if False:  # made a db query to see if ref for game_id matches the current ref
+		return jsonify({'message': 'The results can only be posted by a game referee'}), 401
+
+	# call stored procedure for storing the game result
+	return jsonify({'message': 'Needs the Stored Procedure implemented'}), 501
+
+
+>>>>>>> get-league-schedule
 #public route
 @stats.route('/league/', methods = ['GET'])
 def get_standings():
@@ -14,13 +33,13 @@ def get_standings():
 	season = request.args.get('season', default = None, type = int)
 
 	#control to make sure both the season and league are passed as query parameters
-	if not season and not league:
+	if season is None and league is None:
 		print('error SEASON and LEAGUE parmeters not provided')
 		return jsonify({'message' : 'season and league parmaeters not provided'}), 400
-	elif not season:
+	elif season is None:
 		print('error SEASON parameter not provided')
 		return jsonify({'message' : 'season parmeter not provided'}), 400
-	elif not league:
+	elif league is None:
 		print('error LEAGUE parameter not privided')
 		return jsonify({'message' : 'league parmeter not provided'}), 400
 	
@@ -51,7 +70,7 @@ def get_standings():
 		"league": league,		
 		"standings" : standings_list
 	}
-	return jsonify(standings_dict)
+	return jsonify(standings_dict), 200
 	
 	
 @stats.route('/player/', methods=['GET'])
@@ -140,8 +159,13 @@ def get_team_stat():
 @stats.route('/player/', methods=['PUT'])
 @login_required
 def update_player_stat(current_user):
+<<<<<<< HEAD
     # retrieve query string parameters from URL and player id from current_user
 	player_id = current_user.user_id
+=======
+	# retrieve query string parameters from URL
+	player_id = request.args.get('playerID', default = None, type = int)
+>>>>>>> get-league-schedule
 	game_id = request.args.get('gameID', default = None, type = int)
 	points = request.args.get('points', default = None, type = int)
 	fouls = request.args.get('fouls',  default = None, type = int)
@@ -155,18 +179,23 @@ def update_player_stat(current_user):
 	# error check: ensure that player_id is indeed a player
 	if current_user.access is not AccessLevel.player:
 		return jsonify({'message' : 'Invalid access level, needs a player'}), 401
-            
+			
 	# connects to the database
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
+<<<<<<< HEAD
     # calls for the update_player_stat procedure
+=======
+	# calls for the update_ref_schedule procedure
+>>>>>>> get-league-schedule
 	try: 
 		cursor.callproc('update_player_stat',[player_id, game_id, points,fouls, rebounds, assists])
 	except pymysql.MySQLError as err:
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
+<<<<<<< HEAD
 			return  jsonify ({'message': 'You do not play in a game specified with gameID'}), 400
 	
 	return jsonify({'message': 'Successfully updated the player stats'}), 201
@@ -203,3 +232,9 @@ def update_game_stat(current_user):
 			return  jsonify ({'message': 'You are not scheduled to the game specified with gameID'}), 400
     
 	return jsonify({'message': 'Successfully updated the game stats'}), 201
+=======
+			return  jsonify ({'message': 'playerID does not play in a game with gameID'}), 400
+		
+	return jsonify({'message': 'Successfully updated the game stats'}), 201
+
+>>>>>>> get-league-schedule
