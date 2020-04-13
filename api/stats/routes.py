@@ -6,8 +6,6 @@ import pymysql
 stats = Blueprint('stats', __name__)
 
 
-<<<<<<< HEAD
-=======
 @stats.route('/game/', methods=['PUT'])
 @login_required
 def record_game(current_user):
@@ -24,7 +22,6 @@ def record_game(current_user):
 	return jsonify({'message': 'Needs the Stored Procedure implemented'}), 501
 
 
->>>>>>> get-league-schedule
 #public route
 @stats.route('/league/', methods = ['GET'])
 def get_standings():
