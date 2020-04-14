@@ -31,6 +31,9 @@ def register_team(current_user: User):
         if errno == 1452:
             return  jsonify ({'message': 'Provided league_id or player_id does not exist'}), 400
         if errno == 1062: 
+            if ("unique_player_per_season" in err.args[1]):
+                return  jsonify ({'message': 'The team captain is already registered in this league so they can not register in it again.'}), 400
+            
             return  jsonify ({'message': 'That team name is already taken'}), 400
         else: 
             print(f'Error number: {errno}, Error: {err.args[1]}')
@@ -71,7 +74,7 @@ def update_team(current_user: User):
         for new_league in new_leagues:
             print(f'Adding: {new_league}')
             try:
-                cursor.callproc('register_for_league', [new_league.get('league_id'), req.get('team_id')])
+                cursor.callproc('register_for_league', [new_league.get('league_id'), req.get('team_id'), None])
             except pymysql.MySQLError as err: 
                 errno = err.args[0]
 
@@ -121,14 +124,13 @@ def update_team_roster(current_user: User):
                 if errno == 1062:
                     players_failed.append(new_player.get('player_id'))
                 
-                if errno == 1452:
+                elif errno == 1452:
                     players_failed.append(new_player.get('player_id'))
-
-                
-                print(f'Error number {errno}, Error: {err.args[1]}')
-                return jsonify({'message' : 'Something went wrong...'}), 500
+                else:
+                    print(f'Error number {errno}, Error: {err.args[1]}')
+                    return jsonify({'message' : 'Something went wrong...'}), 500
         
         if players_failed:
-            return  jsonify ({'message': f'That team is already registered in the following leagues: {players_failed}, otherwise OK.'}), 200
+            return  jsonify ({'message': f'Players are already registered in this league, maybe on a different team: {players_failed} (they may not be players), otherwise OK.'}), 200
     
     return jsonify({'message' : 'Updates successful'}), 201  

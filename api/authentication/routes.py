@@ -27,8 +27,8 @@ def login_user():
 	cursor.callproc('get_password', [auth.username])
 	data = cursor.fetchall()
 
-    if (len(data) != 1) or (data[0][0] != auth.password):
-        return make_response('Invalid Credentials', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
+	if (len(data) != 1) or (data[0][0] != auth.password):
+		return make_response('Invalid Credentials', 401, {'WWW-Authenticate' : 'Basic realm="Login Required"'})
 
 	user = User(data[0][1], AccessLevel[data[0][2]])
 
@@ -46,7 +46,7 @@ def register_user():
 	try:
 		AccessLevel[user['type']]
 	except Exception as err:
-		return jsonify({'message' : 'Please send a valid type'}), 400
+		return jsonify({'message' : 'Please send a valid user type'}), 400
 	
 	try:
 		cursor.callproc('register_user', list(user.values()))
