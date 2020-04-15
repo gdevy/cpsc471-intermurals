@@ -202,3 +202,42 @@ def update_game_stat(current_user):
 			return  jsonify ({'message': 'You are not scheduled to the game specified with gameID'}), 400
     
 	return jsonify({'message': 'Successfully updated the game stats'}), 201
+
+
+@stats.route('/game/', methods=['GET'])
+def get_game_stats():
+	game_id = request.args.get('gameID', default = None, type = int)
+	
+	#error check: ensure the gameID is provided
+	if game_id is None:
+		return jsonify({'message': 'The game_id must be provided'}), 400
+	
+	# connect to database
+	conn = mysql.connect()
+	cursor = conn.cursor()
+
+	# check for sql errors
+	try:
+		cursor.callproc('get_game_stats', [game_id])
+		
+	except pymysql.MySQLError as err:
+		errno = err.args[0]
+		print(f'Error number: {errno}')
+		if errno == 1644: 
+			return  jsonify ({'message': 'That game_id does not exist'}), 400
+		if errno == 1054:
+			return  jsonify ({'message': 'No game with that game_id has been played'}), 400
+
+	data = cursor.fetchall()
+	print(data)
+
+	game_stats_dict = {
+		'home_team_name': data[0][0],
+		'home_team_id': data[0][1],
+		'home_team_score': data[0][2],
+		'away_team_name': data[0][3],
+		'away_team_id': data[0][4],
+		'away_team_score': data[0][5]
+	}
+
+	return jsonify(game_stats_dict)
