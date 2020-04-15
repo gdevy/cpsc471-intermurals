@@ -57,12 +57,7 @@ def record_game(current_user):
 				if errno == 1644:
 					return jsonify({'message' : err.args[1],
 									'index': i }), 409
-				print(err.args[1])
-				print('\n')
-				print(i)
-				return jsonify({'message' : 'Threw an error need error code'}), 501
-			
-		
+				
 		return jsonify({'message' : 'Updated the game schedule in the Data Base'}), 201
 
 
