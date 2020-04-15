@@ -33,16 +33,16 @@ def record_game(current_user):
 
 		#validate body, check all the games to make sure all the fields have been filled out
 		for i in range(0,len(req['games'])):
-			if not req['games'][i]['home']:
-				return jsonify({'message' : 'The home team Id must be provided for game at index: ' + str(i)}), 400
-			if not req['games'][i]['away']:
-				return jsonify({'message' : 'The away team Id must be provided at index: ' + str(i)}), 400
-			if not req['games'][i]['date']:
-				return jsonify({'message' : 'The date of the game must be provided at index: ' + str(i)}), 400
-			if not req['games'][i]['location']:
-				return jsonify({'message' : 'The location Id of the game must be provided at index: ' + str(i)}), 400
-			if not req['games'][i]['season']:
-				return jsonify({'message' : 'The season Id for the teams must be provided at index: ' + str(i)}), 400
+			if req['games'][i]['home'] is None:
+				return jsonify({'message' : 'The home team Id must be provided, error at index: ' + str(i)}), 400
+			if req['games'][i]['away'] is None:
+				return jsonify({'message' : 'The away team Id must be provided, error at index: ' + str(i)}), 400
+			if req['games'][i]['date'] is None:
+				return jsonify({'message' : 'The date of the game must be provided, error at index: ' + str(i)}), 400
+			if req['games'][i]['location'] is None:
+				return jsonify({'message' : 'The location Id of the game must be provided, error at index: ' + str(i)}), 400
+			if req['games'][i]['season'] is None:
+				return jsonify({'message' : 'The season Id for the teams must be provided, error at index: ' + str(i)}), 400
 		
 		#iterate through the games list
 		for i in range(0,len(req['games'])):
@@ -54,10 +54,16 @@ def record_game(current_user):
 				errno = err.args[0]
 				print(f'Error number: {errno}')
 				#get errors for if the body is invalid
+				if errno == 1644:
+					return jsonify({'message' : err.args[1],
+									'index': i }), 409
+				print(err.args[1])
+				print('\n')
+				print(i)
 				return jsonify({'message' : 'Threw an error need error code'}), 501
-			print('Updated Games\n')
+			
 		
-		return jsonify({'message' : 'Updated the game schedule in the Data Base'}), 501
+		return jsonify({'message' : 'Updated the game schedule in the Data Base'}), 201
 
 
 @schedule.route('/referee/', methods = ['POST'])
@@ -122,7 +128,7 @@ def get_league_schedule():
 			return  jsonify ({'message': err.args[1]}), 400
 		if errno == 1054:
 			return  jsonify ({'message': 'No games scheduled for that League and Season'}), 400
-			
+
 	data = cursor.fetchall()
 
 	#make sure data is not empty
