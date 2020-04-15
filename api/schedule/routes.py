@@ -120,7 +120,9 @@ def get_league_schedule():
 		print(f'Error number: {errno}')
 		if errno == 1644:
 			return  jsonify ({'message': err.args[1]}), 400
-	
+		if errno == 1054:
+			return  jsonify ({'message': 'No games scheduled for that League and Season'}), 400
+			
 	data = cursor.fetchall()
 
 	#make sure data is not empty
