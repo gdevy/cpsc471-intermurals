@@ -228,9 +228,11 @@ def get_game_stats():
 		if errno == 1054:
 			return  jsonify ({'message': 'No game with that game_id has been played'}), 400
 
+	# retrieve data from the sql query
 	data = cursor.fetchall()
 	print(data)
 
+	#put the data into a dictionary to be turned into json
 	game_stats_dict = {
 		'home_team_name': data[0][0],
 		'home_team_id': data[0][1],
