@@ -135,7 +135,7 @@ def get_league_schedule():
 	#iterate through data and populate games_list
 	for i in range(0, len(data)):
 		items = {
-			'date':data[i][1],
+			'date_time':data[i][1],
 			'away_team': {
 				'team_id': data[i][2],
 				'score': data[i][3]
