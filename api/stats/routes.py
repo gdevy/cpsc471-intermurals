@@ -9,8 +9,8 @@ stats = Blueprint('stats', __name__)
 @stats.route('/league/', methods = ['GET'])
 def get_standings():
 	#get values from the query parameters
-	league = request.args.get('league', default = None, type = int)
-	season = request.args.get('season', default = None, type = int)
+	league = request.args.get('leagueID', default = None, type = int)
+	season = request.args.get('seasonID', default = None, type = int)
 
 	#control to make sure both the season and league are passed as query parameters
 	if season is None and league is None:
@@ -23,10 +23,21 @@ def get_standings():
 		print('error LEAGUE parameter not privided')
 		return jsonify({'message' : 'league parmeter not provided'}), 400
 	
-	#control to make sure the values are integers? Or is this done by the DB?
+	#connect to the database
 	conn = mysql.connect()
 	cursor = conn.cursor()
-	cursor.callproc('get_standings', [league,season])
+	
+	#run stored procedure and check for errors
+	try:
+		cursor.callproc('get_standings', [league,season])
+	except pymysql.MySQLError as err:
+		errno = err.args[0]
+		print(f'Error number: {errno}')
+		if errno == 1644: 
+			return  jsonify ({'message': 'Not a valid league and season combination'}), 400
+		
+
+
 	data = cursor.fetchall()
 	
 	#print data to terminal to confirm values
@@ -36,19 +47,18 @@ def get_standings():
 	standings_list = []
 	for i in range(0, len(data)):
 		items = {
-			'team_name': data[i][0],
-			'games_played': data[i][1],
-			'wins': data[i][2],
-			'losses': data[i][3],
-			'win_percentage': data[i][4],
+			'team_id': data[i][0],
+			'team_name': data[i][1],
+			'games_played': data[i][2],
+			'wins': data[i][3],
+			'losses': data[i][4],
+			'win_percentage': data[i][5],
 			}
 		standings_list.append(items)
 	
 	#put the list into a dictionary so it can be used by jsonify
 	standings_dict = {
-		"season": season,
-		"league": league,		
-		"standings" : standings_list
+		'standings' : standings_list
 	}
 	return jsonify(standings_dict), 200
 	
@@ -224,22 +234,28 @@ def get_game_stats():
 		errno = err.args[0]
 		print(f'Error number: {errno}')
 		if errno == 1644: 
-			return  jsonify ({'message': 'That game_id does not exist'}), 400
-		if errno == 1054:
-			return  jsonify ({'message': 'No game with that game_id has been played'}), 400
+			return  jsonify ({'message': err.args[1]}), 400
 
 	# retrieve data from the sql query
 	data = cursor.fetchall()
-	print(data)
+	
+	stats_list = []
+	
+	#iterate through data and populate stats_list
+	for i in range(0, len(data)):
+		items = {
+			'home_team_name': data[i][0],
+			'home_team_id': data[i][1],
+			'home_team_score': data[i][2],
+			'away_team_name': data[i][3],
+			'away_team_id': data[i][4],
+			'away_team_score': data[i][5]
+		}
+		stats_list.append(items)
 
 	#put the data into a dictionary to be turned into json
 	game_stats_dict = {
-		'home_team_name': data[0][0],
-		'home_team_id': data[0][1],
-		'home_team_score': data[0][2],
-		'away_team_name': data[0][3],
-		'away_team_id': data[0][4],
-		'away_team_score': data[0][5]
+		'stats': stats_list
 	}
 
 	return jsonify(game_stats_dict)
