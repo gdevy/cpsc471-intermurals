@@ -3,6 +3,7 @@ from api.models import login_required, User, AccessLevel
 from api import mysql
 import pymysql
 
+# all endpoint under stats Blueprint share common url root of /stats
 stats = Blueprint('stats', __name__)
 
 #public route

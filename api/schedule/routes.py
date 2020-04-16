@@ -3,6 +3,7 @@ from api.models import login_required, User, AccessLevel
 from api import mysql
 import pymysql
 
+# all endpoint under schedule Blueprint share common url root of /schedule
 schedule = Blueprint('schedule', __name__)
 
 

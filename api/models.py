@@ -11,6 +11,7 @@ class AccessLevel(Enum):
 		referee = 2
 		player = 3
 
+# user entity used to pass login info from authentication decorator to the endpoint functions
 class User:
 	
 	def __init__(self, user_id, access):
@@ -18,6 +19,9 @@ class User:
 		self.user_id = user_id
 		self.password = None
 
+# authenticaion decoractor used to verify JWT in the Authorization header. 
+# If valid login, continues to the endpoint function, otherwise returns an error to the caller 
+# JWT payload expected to have user_id, access and standard JWT expiry time field (exp)
 def login_required(func):
 
 	@wraps(func)

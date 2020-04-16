@@ -22,6 +22,7 @@ def create_app(config_class=Config):
     from api.stats.routes import stats
     from api.teams.routes import teams
 
+    #register each folder to have it's own root URL path
     app.register_blueprint(authentication, url_prefix="/authentication")
     app.register_blueprint(main)
     app.register_blueprint(schedule, url_prefix="/schedule")
