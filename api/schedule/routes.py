@@ -7,59 +7,46 @@ import pymysql
 schedule = Blueprint('schedule', __name__)
 
 
-@schedule.route('/game/', methods = ['POST','PUT'])
+@schedule.route('/game/', methods = ['POST'])
 @login_required
 def record_game(current_user):
 	req = request.json
 	
-	#check to see if it is a PUT method
-	if request.method == 'PUT':
-		if current_user.access is not AccessLevel.referee:
-			return jsonify({'message' : 'Invalid access level, needs a referee'}), 401
-		if False: #made a db query to see if ref for game_id matches the current ref
-				return jsonify({'message' : 'The results can only be posted by a game referee'}), 401
-			
-		#call stored procedure for storing the game result
-		return jsonify({'message' : 'Needs the Stored Procedure implemented'}), 501
-	
-	#check to see if it is a POST method
-	elif request.method == 'POST':
+	#check access level
+	if current_user.access is not AccessLevel.admin:
+		return jsonify({'message' : 'Invlaid access level, requires admin token'}), 401
+	conn = mysql.connect()
+	cursor = conn.cursor()
+
+
+	#validate body, check all the games to make sure all the fields have been filled out
+	for i in range(0,len(req['games'])):
+		if req['games'][i]['home'] is None:
+			return jsonify({'message' : 'The home team Id must be provided, error at index: ' + str(i)}), 400
+		if req['games'][i]['away'] is None:
+			return jsonify({'message' : 'The away team Id must be provided, error at index: ' + str(i)}), 400
+		if req['games'][i]['date'] is None:
+			return jsonify({'message' : 'The date of the game must be provided, error at index: ' + str(i)}), 400
+		if req['games'][i]['location'] is None:
+			return jsonify({'message' : 'The location Id of the game must be provided, error at index: ' + str(i)}), 400
+		if req['games'][i]['season'] is None:
+			return jsonify({'message' : 'The season Id for the teams must be provided, error at index: ' + str(i)}), 400
 		
-		#check access level
-		if current_user.access is not AccessLevel.admin:
-			return jsonify({'message' : 'Invlaid access level, requires admin token'}), 401
-		conn = mysql.connect()
-		cursor = conn.cursor()
+	#iterate through the games list
+	for i in range(0,len(req['games'])):
 
-
-		#validate body, check all the games to make sure all the fields have been filled out
-		for i in range(0,len(req['games'])):
-			if req['games'][i]['home'] is None:
-				return jsonify({'message' : 'The home team Id must be provided, error at index: ' + str(i)}), 400
-			if req['games'][i]['away'] is None:
-				return jsonify({'message' : 'The away team Id must be provided, error at index: ' + str(i)}), 400
-			if req['games'][i]['date'] is None:
-				return jsonify({'message' : 'The date of the game must be provided, error at index: ' + str(i)}), 400
-			if req['games'][i]['location'] is None:
-				return jsonify({'message' : 'The location Id of the game must be provided, error at index: ' + str(i)}), 400
-			if req['games'][i]['season'] is None:
-				return jsonify({'message' : 'The season Id for the teams must be provided, error at index: ' + str(i)}), 400
-		
-		#iterate through the games list
-		for i in range(0,len(req['games'])):
-
-			#call stored procedure for each game
-			try:
-				cursor.callproc('post_game_schedule',[req['games'][i]['home'], req['games'][i]['away'], req['games'][i]['date'], req['games'][i]['location'], req['games'][i]['season']])
-			except pymysql.MySQLError as err:
-				errno = err.args[0]
-				print(f'Error number: {errno}')
-				#get errors for if the body is invalid
-				if errno == 1644:
-					return jsonify({'message' : err.args[1],
-									'index': i }), 409
+		#call stored procedure for each game
+		try:
+			cursor.callproc('post_game_schedule',[req['games'][i]['home'], req['games'][i]['away'], req['games'][i]['date'], req['games'][i]['location'], req['games'][i]['season']])
+		except pymysql.MySQLError as err:
+			errno = err.args[0]
+			print(f'Error number: {errno}')
+			#get errors for if the body is invalid
+			if errno == 1644:
+				return jsonify({'message' : err.args[1],
+								'index': i }), 409
 				
-		return jsonify({'message' : 'Updated the game schedule in the Data Base'}), 201
+	return jsonify({'message' : 'Updated the game schedule in the Data Base'}), 201
 
 
 @schedule.route('/referee/', methods = ['POST'])
