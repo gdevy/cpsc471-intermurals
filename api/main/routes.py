@@ -10,12 +10,8 @@ main = Blueprint('main', __name__)
 @main.route("/")
 @main.route("/home", methods = ['GET'])
 def home():
-	conn = mysql.connect()
-	cursor = conn.cursor()
-	cursor.callproc('getAllPersons', [])
-	data = cursor.fetchall()
-	print(data)
-	return ' '.join(map(str, [row[0] for row in data]))
+	return "<p>Please see the <a href='https://documenter.getpostman.com/view/10336199/Szf6WoLL?version=latest'>Postman Documentation</a> for instruction on how to use the API </p>"
+
 
 
 @main.route("/about/<name>")
